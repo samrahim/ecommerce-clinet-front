@@ -11,7 +11,7 @@ import type { PaginatedData, Query } from "$lib/helper";
 import { get, writable, type Writable } from "svelte/store";
 
 export const subCategorySearchQuery: Writable<string> = writable("");
-export const categoryPageSize: number = 10;
+export const categoryPageSize: number = 5;
 
 export const query: Writable<Query> = writable({
     first: categoryPageSize,
