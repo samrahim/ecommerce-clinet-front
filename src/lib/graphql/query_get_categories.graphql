@@ -1,0 +1,29 @@
+query categories($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy: CategoryOrder, $where: CategoryWhereInput) {
+  categories(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    orderBy: $orderBy
+    where: $where
+  ) {
+    totalCount
+    edges {
+      node {
+        id
+        name
+        createdAt
+        children{
+          id  
+          name
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}

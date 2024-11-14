@@ -1,0 +1,11 @@
+schema: ${VITE_GRAPHQL_API}
+documents:
+  - '**/*.{graphql,gql}'
+generates:
+  src/lib/graphql/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typed-document-node
+    config:
+      useTypeImports: true

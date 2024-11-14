@@ -1,0 +1,21 @@
+query products {
+  products{   
+    edges {
+      node {
+        id
+        name
+        description
+        status
+        images
+        createdAt
+        variants{
+          name
+          attributes{
+            name
+            image
+          }
+        }   
+      }
+    }
+  }
+}
