@@ -1,24 +1,62 @@
 import {
     type CategoriesQuery,
     CategoriesDocument,
-    type CategoriesQueryVariables,
-    type Category,
-    type Maybe,
-    type UpdateCategoryInput,
+    type ProductsQueryVariables,
+    type ProductsQuery,
+    ProductsDocument,
 } from "$lib/graphql/types";
 import { client } from "$lib/graphqlClient";
-import type { PaginatedData, Query } from "$lib/helper";
+import type { PaginatedData } from "$lib/helper";
 import { get, writable, type Writable } from "svelte/store";
+interface RequestState<T> {
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+}
+type CategoriesState = RequestState<CategoriesQuery>;
 
-export const subCategorySearchQuery: Writable<string> = writable("");
-export const categoryPageSize: number = 5;
 
-export const query: Writable<Query> = writable({
-    first: categoryPageSize,
+const initialCategoriesState: CategoriesState = {
+    data: null,
+    loading: false,
+    error: null,
+};
+
+
+export const categoryStore = writable<CategoriesState>(initialCategoriesState);
+
+
+export const fetchAllCategories = async () => {
+    categoryStore.update((state) => ({ ...state, loading: true, error: null }));
+
+    try {
+        const response: CategoriesQuery = await client.request(CategoriesDocument);
+        categoryStore.update(() => ({
+            data: response,
+            loading: false,
+            error: null,
+        }));
+    } catch (error) {
+        categoryStore.update(() => ({
+            data: null,
+            loading: false,
+            error: "Error fetching categories.",
+        }));
+    }
+};
+
+
+
+export const pageSize: number = 10;
+export const filterModal: Writable<boolean> = writable(false);
+
+
+export const query: Writable<ProductsQueryVariables> = writable({
+    first: pageSize,
 });
 
 // Initial store state
-const initialState: PaginatedData<CategoriesQuery> = {
+const initialState: PaginatedData<ProductsQuery> = {
     data: null,
     pageInfo: {
         hasNextPage: false,
@@ -32,50 +70,44 @@ const initialState: PaginatedData<CategoriesQuery> = {
 
 // Create a writable store using the interface
 export const paginationStore =
-    writable<PaginatedData<CategoriesQuery>>(initialState);
-export const subCategorySearchStore =
-    writable<PaginatedData<CategoriesQuery>>(initialState);
+    writable<PaginatedData<ProductsQuery>>(initialState);
 
 export const previous = () => {
     let storeState = get(paginationStore);
     if (storeState.pageInfo?.hasPreviousPage) {
-        query.update((_) => ({
-            last: categoryPageSize,
-            before: storeState.pageInfo?.startCursor,
+        query.update((s) => ({
+            last: pageSize,
+            before: storeState?.pageInfo?.startCursor,
+            where: s.where,
         }));
+        query.set({});
     }
 };
 
 export const next = () => {
+    console.log("we start new next request");
+
     let storeState = get(paginationStore);
     if (storeState.pageInfo?.hasNextPage) {
-        query.update((_) => ({
-            first: categoryPageSize,
-            after: storeState.pageInfo?.endCursor,
+        query.update((s) => ({
+            first: pageSize,
+            after: storeState?.pageInfo?.endCursor,
+            where: s.where,
         }));
     }
 };
 
-paginationStore.update((state) => ({ ...state, loading: true, error: null }));
 
-export const fetchCategories = async (q: Query) => {
+export const fetchProducts = async (variable: ProductsQueryVariables) => {
     paginationStore.update((state) => ({ ...state, loading: true, error: null }));
-
     try {
-        const variable: CategoriesQueryVariables = {
-            first: q.first,
-            last: q.last,
-            after: q.after,
-            before: q.before,
-        };
-        const response: CategoriesQuery = await client.request(
-            CategoriesDocument,
-            variable
-        );
+        const response = await client.request(ProductsDocument, variable);
+        const data: ProductsQuery = response;
+        data.products.edges;
         paginationStore.update((store) => ({
             ...store,
             data: response,
-            pageInfo: response.categories.pageInfo,
+            pageInfo: response.products.pageInfo,
             loading: false,
         }));
     } catch (error) {
@@ -88,29 +120,3 @@ export const fetchCategories = async (q: Query) => {
     }
 };
 
-query.subscribe((v) => {
-    fetchCategories(v);
-});
-
-export function getSubCategories(children?: Maybe<Category[]> | undefined) {
-    return children?.map((value) => value.name).join(",");
-}
-
-subCategorySearchQuery.subscribe(async (value) => {
-    const variable: CategoriesQueryVariables = {
-        first: 5,
-        where: {
-            nameContains: value,
-        },
-    };
-    const response: CategoriesQuery = await client.request(
-        CategoriesDocument,
-        variable
-    );
-    subCategorySearchStore.update((store) => ({
-        ...store,
-        data: response,
-        pageInfo: response.categories.pageInfo,
-        loading: false,
-    }));
-});

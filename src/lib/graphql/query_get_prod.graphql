@@ -1,21 +1,34 @@
-query products {
-  products{   
+query products($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy: ProductOrder, $where: ProductWhereInput) {
+  products(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    orderBy: $orderBy
+    where: $where
+  ) {
+    totalCount
     edges {
       node {
         id
         name
         description
         status
-        images
         createdAt
-        variants{
-          name
-          attributes{
-            name
-            image
-          }
-        }   
+        images
+        price
+        discounts {
+          id
+          value
+          active
+        }
       }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
     }
   }
 }

@@ -1,29 +1,21 @@
-query categories($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy: CategoryOrder, $where: CategoryWhereInput) {
-  categories(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    orderBy: $orderBy
-    where: $where
-  ) {
-    totalCount
-    edges {
-      node {
-        id
+query categories{
+  categories{
+    edges{
+      node
+      {
+       id
         name
+        description
+        status
         createdAt
-        children{
-          id  
-          name
+        images
+        price
+        discounts {
+          id
+          value
+          active
         }
       }
-    }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
     }
   }
 }
