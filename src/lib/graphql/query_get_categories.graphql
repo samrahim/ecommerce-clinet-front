@@ -1,20 +1,10 @@
-query categories{
-  categories{
-    edges{
-      node
-      {
-       id
+query categories {
+  categories {
+    edges {
+      node {
+        id
         name
-        description
-        status
         createdAt
-        images
-        price
-        discounts {
-          id
-          value
-          active
-        }
       }
     }
   }
