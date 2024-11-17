@@ -6,6 +6,8 @@ import {
   ProductsDocument,
   type ProductWhereInput,
   type CategoryEdge,
+  type Product,
+  type ProductEdge,
 } from "$lib/graphql/types";
 import { client } from "$lib/graphqlClient";
 import type { PaginatedData } from "$lib/helper";
@@ -91,6 +93,10 @@ export const next = () => {
   }
 };
 
+
+
+
+
 categoryStore.subscribe((state) => {
   let where: ProductWhereInput = {};
   if (state.loading == false && state.data && state.error == null) {
@@ -111,7 +117,7 @@ categoryStore.subscribe((state) => {
 });
 
 export const fetchProducts = async (variable: ProductsQueryVariables) => {
-  console.log("fetch products");
+
 
   paginationStore.update((state) => ({ ...state, loading: true, error: null }));
   try {
@@ -135,12 +141,13 @@ export const fetchProducts = async (variable: ProductsQueryVariables) => {
 };
 
 query.subscribe((q) => {
-  console.log(`query has been updated`);
+
   fetchProducts(q);
 });
 
 export const categoryClicked = (itemID: string | undefined) => {
-  console.log("cateogry has been clicked");
+
+
   selectedCategory.set(itemID);
   if (!itemID) {
     return;
@@ -152,6 +159,23 @@ export const categoryClicked = (itemID: string | undefined) => {
     return s;
   });
 };
-function $state(arg0: null) {
-  throw new Error("Function not implemented.");
+
+export const selectedProduct = writable<string[]>([]);
+
+export const AddTocart = (productID: string | undefined) => {
+
+  if (!productID) {
+    return;
+  }
+  else {
+    selectedProduct.update((current) => {
+
+
+      if (!current.includes(productID)) {
+        return [...current, productID];
+      } else {
+        return current.filter((product) => product !== productID);
+      }
+    });
+  }
 }

@@ -1,0 +1,31 @@
+query ProductDetails($where: ProductWhereInput!) {
+  products(where: $where) {
+    edges {
+      node {
+        id
+        name
+        images
+        price
+        status
+        description
+        createdAt
+        updatedAt
+        category {
+          id
+          name
+        }
+        variants {
+          id
+          name
+          optionType
+          attributes {
+            id
+            name
+            price
+            image
+          }
+        }
+      }
+    }
+  }
+}
